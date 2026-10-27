@@ -39,3 +39,6 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# local files that must not be published (this folder is served publicly by Next.js)
+/public/ChromeSetup.exe

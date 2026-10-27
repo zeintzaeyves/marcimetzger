@@ -1,26 +1,185 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+/*
+  Design tokens (PROVISIONAL).
+  Hex values are approximations of the "warm cream + taupe" direction and
+  must be replaced with the exact values from the Figma file.
+  Tailwind v4 turns every --color-* below into utilities: bg-cream, text-ink, border-line, etc.
+*/
+@theme {
+  --color-cream: #f6f1e9; /* page background */
+  --color-cream-deep: #ece4d6; /* alternate section background */
+  --color-paper: #fdfbf7; /* cards, panels */
+  --color-ink: #2b2420; /* main text (dark warm brown) */
+  --color-ink-soft: #5e544b; /* secondary text */
+  --color-taupe: #8a7461; /* accents, links, icons */
+  --color-taupe-dark: #6b5948; /* accent hover / text on cream (AA contrast) */
+  --color-line: #ddd3c3; /* subtle borders */
+  --color-parchment: #f0ece4; /* dirty-white section background (About) */
+  --color-blush: #fdf7f5; /* contact section background */
+  --color-brown: #86593a; /* contact form accents / selected pills */
+  --color-input: #fff5ef; /* contact form fields */
+  --color-brown-dark: #6a4229; /* hover/active for brown buttons */
+  --color-night: #1d1a17; /* dark hero / footer */
+  --color-field: #e3dcd0; /* filled form field (location) */
+  --color-sand: #c9bfb0; /* search button */
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
+  /* Set from next/font in app/layout.tsx */
+  --font-serif: var(--font-serif-face), Georgia, "Times New Roman", serif;
+  --font-display: var(--font-display-face), Georgia, "Times New Roman", serif;
+  --font-sans: var(--font-sans-face), system-ui, -apple-system, "Segoe UI", sans-serif;
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+  --breakpoint-xs: 30rem;
+
+  /* Logo strip: the track holds two identical halves, so moving -50% loops with no jump */
+  --animate-marquee: marquee 40s linear infinite;
+  @keyframes marquee {
+    to {
+      transform: translateX(-50%);
+    }
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+@layer base {
+  html {
+    scroll-behavior: smooth;
+    /* The header is not sticky, so anchors need no offset here; sections set their own scroll-mt */
+    background-color: var(--color-cream);
+  }
+
+  body {
+    background-color: var(--color-cream);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    line-height: 1.6;
+    /* Guards against accidental horizontal scroll on mobile */
+    overflow-x: clip;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    font-family: var(--font-serif);
+    font-weight: 500;
+    line-height: 1.15;
+    letter-spacing: -0.01em;
+    text-wrap: balance;
+  }
+
+  /* Visible keyboard focus on every interactive element */
+  :focus-visible {
+    outline: 2px solid var(--color-taupe-dark);
+    outline-offset: 3px;
+    border-radius: 2px;
+  }
+
+  ::selection {
+    background-color: var(--color-taupe);
+    color: var(--color-paper);
+  }
+
+  /* Headline weight comes from utilities (font-light) in the hero */
+  h1 {
+    letter-spacing: -0.015em;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+}
+
+/*
+  Dual-handle price slider (used by SearchPanel).
+  Two native range inputs are stacked on top of each other. Their own tracks are
+  invisible and only the thumbs take pointer events, so both handles can be dragged
+  and keyboard-controlled. The visible track + highlighted segment are drawn by
+  SearchPanel behind them.
+*/
+.range-dual input[type="range"] {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  background: transparent;
+  appearance: none;
+  pointer-events: none;
+}
+
+.range-dual input[type="range"]::-webkit-slider-runnable-track {
+  height: 1rem;
+  background: transparent;
+  border: 0;
+}
+
+.range-dual input[type="range"]::-moz-range-track {
+  height: 1rem;
+  background: transparent;
+  border: 0;
+}
+
+.range-dual input[type="range"]::-webkit-slider-thumb {
+  appearance: none;
+  box-sizing: border-box;
+  pointer-events: auto;
+  width: 1rem;
+  height: 1rem;
+  border-radius: 9999px;
+  border: 2px solid var(--color-paper);
+  background: var(--color-ink);
+  box-shadow: 0 0 0 1px var(--color-ink);
+  cursor: grab;
+}
+
+.range-dual input[type="range"]::-moz-range-thumb {
+  box-sizing: border-box;
+  pointer-events: auto;
+  width: 1rem;
+  height: 1rem;
+  border-radius: 9999px;
+  border: 2px solid var(--color-paper);
+  background: var(--color-ink);
+  box-shadow: 0 0 0 1px var(--color-ink);
+  cursor: grab;
+}
+
+/* Keyboard focus: the global rectangular outline is replaced by a round ring on the thumb itself. */
+.range-dual input[type="range"]:focus-visible {
+  outline: none;
+}
+
+.range-dual input[type="range"]:focus-visible::-webkit-slider-thumb {
+  box-shadow: 0 0 0 1px var(--color-ink), 0 0 0 4px var(--color-paper), 0 0 0 6px var(--color-taupe-dark);
+}
+
+.range-dual input[type="range"]:focus-visible::-moz-range-thumb {
+  box-shadow: 0 0 0 1px var(--color-ink), 0 0 0 4px var(--color-paper), 0 0 0 6px var(--color-taupe-dark);
+}
+
+/*
+  Scroll reveal (see components/ui/Reveal.tsx). Only transform + opacity are animated.
+  Without JavaScript nothing has data-reveal, so everything stays visible.
+*/
+[data-reveal="hidden"] {
+  opacity: 0;
+  transform: translateY(16px);
+}
+
+[data-reveal="shown"] {
+  opacity: 1;
+  transform: none;
+  transition:
+    opacity 500ms ease-out var(--reveal-delay, 0ms),
+    transform 500ms ease-out var(--reveal-delay, 0ms);
 }
